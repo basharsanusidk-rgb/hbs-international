@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBS International | Global B2B Marketplace</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="showSection('home')">
+                <span class="text-2xl font-black tracking-wider text-yellow-400">HBS</span>
+                <span class="text-xl font-semibold">International</span>
+            </div>
+            <div class="hidden md:flex space-x-6 text-sm font-medium items-center">
+                <a href="#" onclick="showSection('home')" class="hover:text-yellow-400 transition">Home</a>
+                <a href="#" onclick="showSection('directory')" class="hover:text-yellow-400 transition">Company Directory</a>
+                <a href="#" onclick="showSection('rfq')" class="hover:text-yellow-400 transition">Request Quotation (RFQ)</a>
+                <a href="#" onclick="showSection('favorites')" class="hover:text-yellow-400 transition flex items-center gap-1">Favorites (<span id="favCount">0</span>)</a>
+                <a href="#" onclick="showSection('inbox')" class="hover:text-yellow-400 transition flex items-center gap-1">Inbox & RFQs (<span id="inboxCount">2</span>)</a>
+            </div>
+            <div class="flex items-center space-x-3" id="authNavContainer">
+                <!-- Injected dynamically based on login state -->
+            </div>
+        </div>
+        <!-- Mobile sub-nav menu -->
+        <div class="md:hidden flex justify-around bg-blue-950 py-2 text-xs border-t border-blue-800 text-gray-200">
+            <a href="#" onclick="showSection('home')" class="hover:text-yellow-400">Home</a>
+            <a href="#" onclick="showSection('directory')" class="hover:text-yellow-400">Directory</a>
+            <a href="#" onclick="showSection('rfq')" class="hover:text-yellow-400">RFQ</a>
+            <a href="#" onclick="showSection('favorites')" class="hover:text-yellow-400">Favorites</a>
+            <a href="#" onclick="showSection('inbox')" class="hover:text-yellow-400">Inbox</a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- 1. HOME SECTION -->
+        <section id="home-section" class="space-y-12">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-blue-800 to-blue-950 text-white rounded-2xl p-8 md:p-16 text-center shadow-xl">
+                <h1 class="text-3xl md:text-5xl font-extrabold mb-4">Connect with Global Buyers & Suppliers</h1>
+                <p class="text-blue-200 max-w-2xl mx-auto mb-8 text-sm md:text-base">Discover international enterprises, showcase products worldwide, and source goods seamlessly on HBS International.</p>
+                <div class="max-w-2xl mx-auto flex flex-col sm:flex-row bg-white rounded-lg p-2 shadow-lg gap-2">
+                    <input type="text" id="searchInput" placeholder="Search products (e.g., Solar, Cotton, Machine)..." class="w-full px-4 text-gray-800 focus:outline-none text-sm py-2">
+                    <button onclick="handleSearch()" class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2 rounded-md font-medium text-sm transition">Search</button>
+                </div>
+            </div>
+
+            <!-- Advanced Filter Bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">Category</label>
+                    <select id="filterCategory" onchange="applyAdvancedFilters()" class="w-full border rounded-lg px-3 py-2 bg-white">
+                        <option value="">All Categories</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Agricultural Products">Agricultural Products</option>
+                        <option value="Food">Food</option>
+                        <option value="Cosmetics">Cosmetics</option>
+                        <option value="Machinery">Machinery</option>
+                        <option value="Building Materials">Building Materials</option>
+                        <option value="Medical Supplies">Medical Supplies</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">Country</label>
+                    <select id="filterCountry" onchange="applyAdvancedFilters()" class="w-full border rounded-lg px-3 py-2 bg-white">
+                        <option value="">All Countries</option>
+                        <option value="China">China</option>
+                        <option value="Germany">Germany</option>
+                        <option value="Turkey">Turkey</option>
+                        <option value="USA">USA</option>
+                        <option value="Nigeria">Nigeria</option>
+                        <option value="Brazil">Brazil</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">Max Price ($)</label>
+                    <input type="number" id="filterMaxPrice" placeholder="e.g. 5000" oninput="applyAdvancedFilters()" class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="resetFilters()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg transition">Reset Filters</button>
+                </div>
+            </div>
+
+            <!-- Featured Products Grid -->
+            <div>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Marketplace Products</h2>
+                    <span class="text-xs text-amber-800 bg-amber-50 px-3 py-1 rounded border border-amber-200 font-medium">⚠️ Notice: Demo data stored in browser localStorage</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="productGrid">
+                    <!-- Dynamic Products -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. PRODUCT DETAILS SECTION -->
+        <section id="product-detail-section" class="hidden space-y-6 max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+            <button onclick="showSection('home')" class="text-sm text-blue-600 hover:underline">&larr; Back to Marketplace</button>
+            <div id="productDetailContent" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- 3. COMPANY DIRECTORY SECTION -->
+        <section id="directory-section" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Global Supplier Directory</h2>
+                    <p class="text-sm text-gray-500">Explore enterprises showcasing items on HBS International.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="companyDirectoryList">
+                <!-- Directory Cards -->
+            </div>
+        </section>
+
+        <!-- 4. PROFILE SECTION -->
+        <section id="profile-section" class="hidden max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <div class="flex justify-between items-center border-b pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900" id="profileTitle">User Profile</h2>
+                    <p class="text-xs text-gray-500">Manage your business account information.</p>
+                </div>
+                <span id="profileRoleBadge" class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold uppercase"></span>
+            </div>
+            <div id="profileDetails" class="space-y-4 text-sm">
+                <!-- Populated via JS -->
+            </div>
+            <div id="sellerDashboardContainer" class="hidden pt-6 border-t space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-900">Seller Product Management</h3>
+                    <button onclick="openProductModal()" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-xs font-semibold">+ Add New Product</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-100 border-b text-gray-700">
+                                <th class="p-3">Product Name</th>
+                                <th class="p-3">Category</th>
+                                <th class="p-3">Price</th>
+                                <th class="p-3">MOQ</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sellerProductsTable">
+                            <!-- Seller items -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. REQUEST FOR QUOTATION (RFQ) SECTION -->
+        <section id="rfq-section" class="hidden max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Request For Quotation (RFQ)</h2>
+                <p class="text-sm text-gray-500">Submit sourcing specifications to receive competitive bids from global suppliers.</p>
+            </div>
+            <form onsubmit="handleRFQSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Product Name / Description *</label>
+                    <input type="text" id="rfqName" required placeholder="e.g., Industrial Solar Panels 400W" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Target Quantity *</label>
+                        <input type="number" id="rfqQty" required placeholder="e.g., 500" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                        <select id="rfqUnit" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-white">
+                            <option>Pieces / Units</option>
+                            <option>Kilograms (kg)</option>
+                            <option>Metric Tons</option>
+                            <option>Containers (20ft/40ft)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Detailed Requirements & Shipping Destination *</label>
+                    <textarea id="rfqDetails" rows="4" required placeholder="Specify certifications, destination port, packaging requirements..." class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-medium py-2.5 rounded-lg text-sm transition">Submit RFQ to Global Suppliers</button>
+            </form>
+        </section>
+
+        <!-- 6. FAVORITES SECTION -->
+        <section id="favorites-section" class="hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-900">Your Saved Favorite Products</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="favoritesGrid">
+                <!-- Favorites injected here -->
+            </div>
+        </section>
+
+        <!-- 7. INBOX & RFQ MANAGEMENT SECTION -->
+        <section id="inbox-section" class="hidden max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Messages & RFQ Inbox</h2>
+                <p class="text-xs text-amber-800 bg-amber-50 p-2 rounded border border-amber-200 mt-1 inline-block">⚠️ Demo Inbox: Simulated sample messages and requests. Real backend database integration required for live client communication.</p>
+            </div>
+            <div class="space-y-4" id="inboxListContainer">
+                <!-- Messages populated via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-blue-950 text-white py-8 mt-12 text-center text-xs space-y-2">
+        <p class="font-bold text-sm tracking-wider text-yellow-400">HBS International</p>
+        <p class="text-gray-400">Global B2B Marketplace Prototype — Connecting world commerce without barriers.</p>
+        <p class="text-gray-500">&copy; 2026 HBS International. Frontend Demo Prototype.</p>
+    </footer>
+
+    <!-- MODAL: AUTHENTICATION (LOGIN / REGISTER) -->
+    <div id="authModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            
+            <div class="flex border-b text-sm font-semibold">
+                <button onclick="switchAuthTab('login')" id="tabLoginBtn" class="flex-1 py-2 border-b-2 border-blue-900 text-blue-950">Sign In</button>
+                <button onclick="switchAuthTab('register')" id="tabRegBtn" class="flex-1 py-2 text-gray-400">Register</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginFormContent" onsubmit="handleLogin(event)" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="loginEmail" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="buyer@example.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="loginPass" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                </div>
+                <p class="text-[11px] text-gray-500 bg-gray-50 p-2 rounded">Note: Real user authentication requires a secure backend hashing database. This prototype simulates sessions via browser localStorage.</p>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-lg text-sm transition">Sign In</button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerFormContent" onsubmit="handleRegister(event)" class="space-y-3 pt-2 hidden">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Account Role *</label>
+                        <select id="regRole" class="w-full border rounded-lg px-2 py-2 text-xs bg-white">
+                            <option value="buyer">Buyer</option>
+                            <option value="seller">Seller / Supplier</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Country *</label>
+                        <select id="regCountry" class="w-full border rounded-lg px-2 py-2 text-xs bg-white">
+                            <option value="China">China</option>
+                            <option value="Germany">Germany</option>
+                            <option value="Turkey">Turkey</option>
+                            <option value="USA">USA</option>
+                            <option value="Nigeria">Nigeria</option>
+                            <option value="Brazil">Brazil</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input type="text" id="regName" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="John Doe">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Company Name *</label>
+                    <input type="text" id="regCompany" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Global Imports LLC">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Email Address *</label>
+                    <input type="email" id="regEmail" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="john@globalimports.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Password *</label>
+                    <input type="password" id="regPass" required class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-950 font-bold py-2 rounded-lg text-sm transition">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CONTACT SUPPLIER / INQUIRY -->
+    <div id="contactModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeContactModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            <h3 id="modalSupplierTitle" class="text-lg font-bold text-gray-900">Contact Supplier</h3>
+            <p class="text-xs text-gray-500">Send an inquiry to this supplier's export division.</p>
+            <form onsubmit="handleInquirySubmit(event)" class="space-y-3">
+                <input type="text" id="inquiryUser" placeholder="Your Name / Company Name" required class="w-full border rounded-lg px-3 py-2 text-sm">
+                <input type="email" id="inquiryEmail" placeholder="Your Professional Email" required class="w-full border rounded-lg px-3 py-2 text-sm">
+                <textarea rows="3" id="inquiryMsg" placeholder="Specify requirements, pricing questions, sample requests..." required class="w-full border rounded-lg px-3 py-2 text-sm"></textarea>
+                <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-600 text-blue-950 font-bold py-2 rounded-lg text-sm transition">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT PRODUCT (SELLER DASHBOARD) -->
+    <div id="addProductModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            <h3 id="productModalTitle" class="text-lg font-bold text-gray-900">Add New Product Listing</h3>
+            <form onsubmit="handleSaveProduct(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="editProductId">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Product Name *</label>
+                    <input type="text" id="prodName" required class="w-full border rounded-lg px-3 py-2" placeholder="e.g. Industrial Solar Inverter">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Category *</label>
+                        <select id="prodCategory" class="w-full border rounded-lg px-2 py-2 bg-white">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Agricultural Products">Agricultural Products</option>
+                            <option value="Food">Food</option>
+                            <option value="Cosmetics">Cosmetics</option>
+                            <option value="Machinery">Machinery</option>
+                            <option value="Building Materials">Building Materials</option>
+                            <option value="Medical Supplies">Medical Supplies</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Price Range / Unit *</label>
+                        <input type="text" id="prodPrice" required class="w-full border rounded-lg px-3 py-2" placeholder="$1,200 - $1,400">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Minimum Order (MOQ) *</label>
+                        <input type="text" id="prodMoq" required class="w-full border rounded-lg px-3 py-2" placeholder="5 Units">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Country *</label>
+                        <select id="prodCountry" class="w-full border rounded-lg px-2 py-2 bg-white">
+                            <option value="China">China</option>
+                            <option value="Germany">Germany</option>
+                            <option value="Turkey">Turkey</option>
+                            <option value="USA">USA</option>
+                            <option value="Nigeria">Nigeria</option>
+                            <option value="Brazil">Brazil</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Image URL *</label>
+                    <input type="url" id="prodImage" required class="w-full border rounded-lg px-3 py-2" placeholder="https://images.unsplash.com/...">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Description *</label>
+                    <textarea rows="3" id="prodDesc" required class="w-full border rounded-lg px-3 py-2" placeholder="Describe product specs, packaging, certifications..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded-lg transition">Save Product Listing</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // Initial Mock Database Seed
+        const defaultProducts = [
+            { id: 1, name: "Industrial Solar Inverter 10KW", category: "Electronics", price: "$1,200 - $1,400", numericPrice: 1300, moq: "5 Units", country: "China", company: "Shenzhen PowerTech Ltd", description: "High efficiency hybrid solar inverter with digital monitoring display.", image: "https://images.unsplash.com/photo-1509391365360-e835336f470f?auto=format&fit=crop&w=600&q=80" },
+            { id: 2, name: "CNC Precision Milling Machine", category: "Machinery", price: "$15,500", numericPrice: 15500, moq: "1 Unit", country: "Germany", company: "Bavaria Machinery GMBH", description: "Heavy duty steel cutting industrial CNC milling machine.", image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80" },
+            { id: 3, name: "Organic Shea Butter Bulk", category: "Cosmetics", price: "$3.50 / kg", numericPrice: 3.5, moq: "500 kg", country: "Turkey", company: "Anatolia Natural Goods", description: "100% pure raw unrefined organic cosmetic grade shea butter.", image: "https://images.unsplash.com/photo-1608248597359-9943b1aa6e9a?auto=format&fit=crop&w=600&q=80" },
+            { id: 4, name: "Medical Grade Nitrile Gloves", category: "Medical Supplies", price: "$32 / Box", numericPrice: 32, moq: "1,000 Boxes", country: "USA", company: "Apex Global Health USA", description: "Powder-free examination medical protective gloves box of 100.", image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80" },
+            { id: 5, name: "Organic Raw Cocoa Beans", category: "Agricultural Products", price: "$2,400 / Ton", numericPrice: 2400, moq: "10 Metric Tons", country: "Nigeria", company: "West Africa Agro Export", description: "Premium grade fermented dried raw cocoa beans.", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        const defaultCompanies = [
+            { name: "Shenzhen PowerTech Ltd", country: "China", category: "Electronics", verification: "Verification Pending", productsCount: 1, description: "Leading manufacturer of power electronic conversions systems and solar components." },
+            { name: "Bavaria Machinery GMBH", country: "Germany", category: "Machinery", verification: "Demo Supplier", productsCount: 1, description: "Precision engineering tools and industrial automation systems." },
+            { name: "Anatolia Natural Goods", country: "Turkey", category: "Cosmetics", verification: "Verification Pending", productsCount: 1, description: "Exporters of agricultural extractions, natural organic butter, and oils." },
+            { name: "Apex Global Health USA", country: "USA", category: "Medical Supplies", verification: "Demo Supplier", productsCount: 1, description: "Global distributor of clinical pharmaceuticals and safety equipment." },
+            { name: "West Africa Agro Export", country: "Nigeria", category: "Agricultural Products", verification: "Verification Pending", productsCount: 1, description: "Direct farm sourcing and export of premium commodities." }
+        ];
+
+        const defaultMessages = [
+            { id: 1, sender: "Global Trading Inc (Buyer)", date: "2026-10-08", snippet: "Hello, we are interested in purchasing 50 units of your Industrial Solar Inverter. Can you provide FOB shipping terms to Rotterdam port?", type: "Inquiry" },
+            { id: 2, sender: "Sourcing Hub Europe", date: "2026-10-09", snippet: "RFQ Response: Your quote request for CNC Precision Milling Machine has been received by Bavaria Machinery.", type: "RFQ Notice" }
+        ];
+
+        // Load or Initialize State from localStorage
+        let products = JSON.parse(localStorage.getItem('hbs_products')) || defaultProducts;
+        let companies = JSON.parse(localStorage.getItem('hbs_companies')) || defaultCompanies;
+        let favorites = JSON.parse(localStorage.getItem('hbs_favorites')) || [];
+        let messages = JSON.parse(localStorage.getItem('hbs_messages')) || defaultMessages;
+        let currentUser = JSON.parse(localStorage.getItem('hbs_currentUser')) || null;
+
+        function saveState() {
+            localStorage.setItem('hbs_products', JSON.stringify(products));
+            localStorage.setItem('hbs_companies', JSON.stringify(companies));
+            localStorage.setItem('hbs_favorites', JSON.stringify(favorites));
+            localStorage.setItem('hbs_messages', JSON.stringify(messages));
+            localStorage.setItem('hbs_currentUser', JSON.stringify(currentUser));
+            updateCounters();
+        }
+
+        function updateCounters() {
+            document.getElementById('favCount').innerText = favorites.length;
+            document.getElementById('inboxCount').innerText = messages.length;
+            renderAuthNav();
+        }
+
+        // Render Navbar Authentication state
+        function renderAuthNav() {
+            const container = document.getElementById('authNavContainer');
+            if (currentUser) {
+                container.innerHTML = `
+                    <button onclick="showSection('profile')" class="text-xs bg-blue-800 hover:bg-blue-700 px-3 py-1.5 rounded font-medium border border-blue-700 text-yellow-300">👤 ${currentUser.name} (${currentUser.role})</button>
+                    <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition">Logout</button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal()" class="bg-yellow-500 hover:bg-yellow-600 text-blue-950 font-bold px-4 py-2 rounded text-sm transition">Sign In / Register</button>
+                `;
+            }
+        }
+
+        // Navigation Controller
+        function showSection(sectionId) {
+            const sections = ['home-section', 'product-detail-section', 'directory-section', 'profile-section', 'rfq-section', 'favorites-section', 'inbox-section'];
+            sections.forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.classList.add('hidden');
+            });
+
+            if (sectionId === 'home') document.getElementById('home-section').classList.remove('hidden');
+            if (sectionId === 'directory') {
+                document.getElementById('directory-section').classList.remove('hidden');
+                renderDirectory();
+            }
+            if (sectionId === 'profile') {
+                if (!currentUser) { openAuthModal(); return; }
+                document.getElementById('profile-section').classList.remove('hidden');
+                renderProfile();
+            }
+            if (sectionId === 'rfq') document.getElementById('rfq-section').classList.remove('hidden');
+            if (sectionId === 'favorites') {
+                document.getElementById('favorites-section').classList.remove('hidden');
+                renderFavorites();
+            }
+            if (sectionId === 'inbox') {
+                if (!currentUser) { openAuthModal(); return; }
+                document.getElementById('inbox-section').classList.remove('hidden');
+                renderInbox();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // Render Products Grid on Homepage
+        function renderProducts(items) {
+            const grid = document.getElementById('productGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            if (items.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center py-12 text-gray-500 text-sm">No products found matching your search criteria.</p>`;
+                return;
+            }
+            items.forEach(p => {
+                const isFav = favorites.includes(p.id);
+                grid.innerHTML += `
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition">
+                        <div>
+                            <div class="relative cursor-pointer" onclick="viewProductDetail(${p.id})">
+                                <img src="${p.image}" alt="${p.name}" class="w-full h-44 object-cover">
+                                <span class="absolute top-2 left-2 text-[10px] bg-blue-900/80 text-white px-2 py-0.5 rounded font-medium">${p.country}</span>
+                            </div>
+                            <div class="p-4 space-y-1.5">
+                                <span class="text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-medium uppercase">${p.category}</span>
+                                <h3 class="font-bold text-gray-800 text-sm line-clamp-1 cursor-pointer hover:text-blue-600" onclick="viewProductDetail(${p.id})">${p.name}</h3>
+                                <p class="text-blue-900 font-extrabold text-sm">${p.price}</p>
+                                <p class="text-xs text-gray-500">MOQ: ${p.moq}</p>
+                                <p class="text-[11px] text-gray-400 truncate">Supplier: ${p.company}</p>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0 flex gap-2">
+                            <button onclick="openContactModal('${p.company}')" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-900 font-semibold py-2 rounded text-xs transition">Inquire</button>
+                            <button onclick="toggleFavorite(${p.id})" class="px-3 py-2 rounded text-xs border ${isFav ? 'bg-red-50 border-red-200 text-red-600' : 'bg-gray-50 border-gray-200 text-gray-500'} hover:bg-red-100 transition" title="Save Favorite">
+                                ${isFav ? '♥' : '♡'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Advanced Filters & Search
+        function applyAdvancedFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('filterCategory').value;
+            const country = document.getElementById('filterCountry').value;
+            const maxPriceInput = document.getElementById('filterMaxPrice').value;
+            const maxPrice = maxPriceInput === '' ? Infinity : parseFloat(maxPriceInput);
+
+            const filtered = products.filter(p => {
+                const matchesQuery = p.name.toLowerCase().includes(query) || p.company.toLowerCase().includes(query) || p.description.toLowerCase().includes(query);
+                const matchesCat = category === "" || p.category === category;
+                const matchesCtry = country === "" || p.country === country;
+                const matchesPrice = (p.numericPrice || 0) <= maxPrice;
+                return matchesQuery && matchesCat && matchesCtry && matchesPrice;
+            });
+            renderProducts(filtered);
+        }
+
+        function handleSearch() {
+            applyAdvancedFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterCountry').value = '';
+            document.getElementById('filterMaxPrice').value = '';
+            renderProducts(products);
+        }
+
+        // Product Details View
+        function viewProductDetail(id) {
+            const p = products.find(prod => prod.id === id);
+            if (!p) return;
+            const detailContainer = document.getElementById('productDetailContent');
+            detailContainer.innerHTML = `
+                <div>
+                    <img src="${p.image}" alt="${p.name}" class="w-full h-80 object-cover rounded-xl shadow-md">
+                </div>
+                <div class="space-y-4">
+                    <span class="text-xs bg-blue-50 text-blue-800 px-3 py-1 rounded-full font-semibold">${p.category} • ${p.country}</span>
+                    <h2 class="text-2xl font-bold text-gray-900">${p.name}</h2>
+                    <p class="text-2xl font-extrabold text-blue-900">${p.price}</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">${p.description}</p>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-1 text-xs text-gray-600">
+                        <p><strong>Minimum Order Quantity (MOQ):</strong> ${p.moq}</p>
+                        <p><strong>Supplying Enterprise:</strong> ${p.company}</p>
+                        <p><strong>Verification Status:</strong> <span class="text-amber-700 font-medium">Verification Pending (Demo)</span></p>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="openContactModal('${p.company}')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-blue-950 font-bold py-2.5 rounded-lg text-sm transition">Contact Supplier</button>
+                        <button onclick="showSection('rfq')" class="flex-1 bg-blue-900 hover:bg-blue-800 text-white font-medium py-2.5 rounded-lg text-sm transition">Request a Quote</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('home-section').classList.add('hidden');
+            document.getElementById('product-detail-section').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // Favorites Handler
+        function toggleFavorite(id) {
+            const index = favorites.indexOf(id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push(id);
+            }
+            saveState();
+            renderProducts(products);
+            if (!document.getElementById('favorites-section').classList.contains('hidden')) {
+                renderFavorites();
+            }
+        }
+
+        function renderFavorites() {
+            const grid = document.getElementById('favoritesGrid');
+            const favProducts = products.filter(p => favorites.includes(p.id));
+            grid.innerHTML = '';
+            if (favProducts.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center py-12 text-gray-500 text-sm">You have not saved any favorite products yet.</p>`;
+                return;
+            }
+            favProducts.forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 flex flex-col justify-between">
+                        <div>
+                            <img src="${p.image}" alt="${p.name}" class="w-full h-40 object-cover cursor-pointer" onclick="viewProductDetail(${p.id})">
+                            <div class="p-4 space-y-1">
+                                <h3 class="font-bold text-gray-800 text-sm line-clamp-1">${p.name}</h3>
+                                <p class="text-blue-900 font-bold text-xs">${p.price}</p>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <button onclick="toggleFavorite(${p.id})" class="w-full bg-red-50 text-red-600 font-semibold py-1.5 rounded text-xs hover:bg-red-100 transition">Remove Favorite</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Company Directory
+        function renderDirectory() {
+            const list = document.getElementById('companyDirectoryList');
+            if (!list) return;
+            list.innerHTML = '';
+            companies.forEach(c => {
+                list.innerHTML += `
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-gray-900 text-lg">${c.name}</h3>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] px-2.5 py-1 rounded-full font-semibold">⚠️ ${c.verification}</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Country: <span class="font-medium text-gray-800">${c.country}</span> | Category: <span class="font-medium text-gray-800">${c.category}</span></p>
+                            <p class="text-xs text-gray-600 leading-relaxed">${c.description}</p>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t">
+                            <span class="text-xs text-blue-600 font-medium">${c.productsCount} Products listed</span>
+                            <button onclick="openContactModal('${c.name}')" class="bg-blue-900 text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-blue-800 transition">Inquire Now</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Modal Controls (Auth, Contact, Product Management)
+        function openAuthModal() {
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function openContactModal(supplierName) {
+            document.getElementById('modalSupplierTitle').innerText = `Contact: ${supplierName}`;
+            const modal = document.getElementById('contactModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeContactModal() {
+            const modal = document.getElementById('contactModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function openProductModal() {
+            document.getElementById('editProductId').value = '';
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodPrice').value = '';
+            document.getElementById('prodMoq').value = '';
+            document.getElementById('prodImage').value = '';
+            document.getElementById('prodDesc').value = '';
+            document.getElementById('productModalTitle').innerText = "Add New Product Listing";
+            const modal = document.getElementById('addProductModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('addProductModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function switchAuthTab(tab) {
+            const loginBtn = document.getElementById('tabLoginBtn');
+            const regBtn = document.getElementById('tabRegBtn');
+            const loginContent = document.getElementById('loginFormContent');
+            const regContent = document.getElementById('registerFormContent');
+
+            if (tab === 'login') {
+                loginBtn.className = "flex-1 py-2 border-b-2 border-blue-900 text-blue-950 font-bold";
+                regBtn.className = "flex-1 py-2 text-gray-400";
+                loginContent.classList.remove('hidden');
+                regContent.classList.add('hidden');
+            } else {
+                regBtn.className = "flex-1 py-2 border-b-2 border-blue-900 text-blue-950 font-bold";
+                loginBtn.className = "flex-1 py-2 text-gray-400";
+                regContent.classList.remove('hidden');
+                loginContent.classList.add('hidden');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const role = document.getElementById('regRole').value;
+            const name = document.getElementById('regName').value;
+            const company = document.getElementById('regCompany').value;
+            const email = document.getElementById('regEmail').value;
+            const country = document.getElementById('regCountry').value;
+
+            currentUser = { role, name, company, email, country };
+            
+            if (role === 'seller') {
+                const existingComp = companies.find(c => c.name.toLowerCase() === company.toLowerCase());
+                if (!existingComp) {
+                    companies.push({ name: company, country: country, category: "Electronics", verification: "Verification Pending", productsCount: 0, description: "Newly registered seller company profile." });
+                }
+            }
+
+            saveState();
+            closeAuthModal();
+            alert(`Registration successful! Welcome to HBS International, ${name}. Note: Real authentication requires a secure backend database.`);
+            showSection('profile');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            currentUser = { role: email.includes('sell') ? 'seller' : 'buyer', name: email.split('@')[0], company: "Demo Enterprise LLC", email: email, country: "USA" };
+            saveState();
+            closeAuthModal();
+            alert('Login successful! Simulated session started via browser localStorage.');
+            showSection('profile');
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            saveState();
+            showSection('home');
+            alert('You have logged out successfully.');
+        }
+
+        // Profile & Seller Dashboard Rendering
+        function renderProfile() {
+            if (!currentUser) return;
+            document.getElementById('profileTitle').innerText = `${currentUser.name}'s Profile`;
+            document.getElementById('profileRoleBadge').innerText = currentUser.role;
+
+            const details = document.getElementById('profileDetails');
+            details.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border">
+                    <p><strong>Company Name:</strong> ${currentUser.company}</p>
+                    <p><strong>Country:</strong> ${currentUser.country}</p>
+                    <p><strong>Email Address:</strong> ${currentUser.email}</p>
+                    <p><strong>Account Type:</strong> ${currentUser.role.toUpperCase()}</p>
+                </div>
+            `;
+
+            const dashboard = document.getElementById('sellerDashboardContainer');
+            if (currentUser.role === 'seller') {
+                dashboard.classList.remove('hidden');
+                renderSellerProducts();
+            } else {
+                dashboard.classList.add('hidden');
+            }
+        }
+
+        function renderSellerProducts() {
+            const tbody = document.getElementById('sellerProductsTable');
+            if (!tbody) return;
+            const myProducts = products.filter(p => p.company.toLowerCase() === currentUser.company.toLowerCase());
+            tbody.innerHTML = '';
+            if (myProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No products listed under your company name yet. Click '+ Add New Product'.</td></tr>`;
+                return;
+            }
+            myProducts.forEach(p => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 font-semibold text-gray-800">${p.name}</td>
+                        <td class="p-3">${p.category}</td>
+                        <td class="p-3">${p.price}</td>
+                        <td class="p-3">${p.moq}</td>
+                        <td class="p-3 text-right space-x-2">
+                            <button onclick="editProduct(${p.id})" class="text-blue-600 hover:underline font-medium">Edit</button>
+                            <button onclick="deleteProduct(${p.id})" class="text-red-600 hover:underline font-medium">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Seller Product Operations
+        function handleSaveProduct(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editProductId').value;
+            const name = document.getElementById('prodName').value;
+            const category = document.getElementById('prodCategory').value;
+            const price = document.getElementById('prodPrice').value;
+            const moq = document.getElementById('prodMoq').value;
+            const country = document.getElementById('prodCountry').value;
+            const image = document.getElementById('prodImage').value;
+            const description = document.getElementById('prodDesc').value;
+            const numericPrice = parseFloat(price.replace(/[^0-9.]/g, '')) || 100;
+
+            if (editId) {
+                const prod = products.find(p => p.id == editId);
+                if (prod) {
+                    prod.name = name; prod.category = category; prod.price = price; prod.numericPrice = numericPrice;
+                    prod.moq = moq; prod.country = country; prod.image = image; prod.description = description;
+                }
+            } else {
+                const newId = Date.now();
+                products.unshift({
+                    id: newId, name, category, price, numericPrice, moq, country, 
+                    company: currentUser ? currentUser.company : "Independent Supplier", 
+                    description, image
+                });
+            }
+
+            saveState();
+            closeProductModal();
+            renderProducts(products);
+            if (currentUser && currentUser.role === 'seller') renderSellerProducts();
+            alert('Product listing saved successfully!');
+        }
+
+        function editProduct(id) {
+            const p = products.find(prod => prod.id === id);
+            if (!p) return;
+            document.getElementById('editProductId').value = p.id;
+            document.getElementById('prodName').value = p.name;
+            document.getElementById('prodCategory').value = p.category;
+            document.getElementById('prodPrice').value = p.price;
+            document.getElementById('prodMoq').value = p.moq;
+            document.getElementById('prodCountry').value = p.country;
+            document.getElementById('prodImage').value = p.image;
+            document.getElementById('prodDesc').value = p.description;
+            document.getElementById('productModalTitle').innerText = "Edit Product Listing";
+            const modal = document.getElementById('addProductModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product listing?')) {
+                products = products.filter(p => p.id !== id);
+                saveState();
+                renderProducts(products);
+                renderSellerProducts();
+            }
+        }
+
+        // Contact & RFQ Management Handlers
+        function handleInquirySubmit(e) {
+            e.preventDefault();
+            const user = document.getElementById('inquiryUser').value;
+            const msg = document.getElementById('inquiryMsg').value;
+            messages.unshift({ id: Date.now(), sender: user, date: new Date().toISOString().split('T')[0], snippet: msg, type: "Direct Inquiry" });
+            saveState();
+            closeContactModal();
+            alert('Success! Your inquiry message has been securely recorded to the sample inbox demo.');
+        }
+
+        function handleRFQSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('rfqName').value;
+            const qty = document.getElementById('rfqQty').value;
+            const details = document.getElementById('rfqDetails').value;
+            messages.unshift({ id: Date.now(), sender: `RFQ Submission (${qty} units)`, date: new Date().toISOString().split('T')[0], snippet: `Requirement: ${name}. Details: ${details}`, type: "RFQ" });
+            saveState();
+            alert('Your Request for Quotation (RFQ) was broadcasted successfully to demo suppliers and logged in your inbox!');
+            showSection('inbox');
+        }
+
+        function renderInbox() {
+            const container = document.getElementById('inboxListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (messages.length === 0) {
+                container.innerHTML = `<p class="text-center py-8 text-gray-400 text-sm">Your inbox is currently empty.</p>`;
+                return;
+            }
+            messages.forEach(m => {
+                container.innerHTML += `
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-col space-y-1">
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span class="font-bold text-blue-900">${m.sender}</span>
+                            <span>${m.date} • <span class="text-amber-700 font-semibold">${m.type}</span></span>
+                        </div>
+                        <p class="text-sm text-gray-800">${m.snippet}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Initial App Load
+        renderProducts(products);
+        updateCounters();
+    </script>
+</body>
+</html>
